@@ -41,7 +41,6 @@ class UserController {
 
         res.json(updatedData.rows)
 
-
     }
 }
 

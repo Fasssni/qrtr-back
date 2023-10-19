@@ -1,41 +1,34 @@
-const TelegramApi=require("node-telegram-bot-api")
-const token="6523932478:AAEO32hl4iYqvaIoZGxUZV7og2SKtF1BBrU"
-
-const bot=new TelegramApi (token,{polling: true})
-
 const express=require('express')
 const cors= require("cors")
 const env=require('dotenv').config()
-const userRouter= require("./store/routes/user.routes.js")
+const cookieParser= require("cookie-parser")
+const sequelize=require("sequelize")
+const bcrypt=require('bcrypt')
 
+
+const userRouter= require("./store/routes/user.routes.js")
+const PostController=require("./store/routes/post.routes.js")
+const userRoutes=require("./Routes/userRoutes.js")
+const db = require('./Models/index.js')
 
 const PORT=process.env.PORT||3000
 
 const app=express()
+
+//middleware
 app.use(cors())
 app.use(express.json())
-
-
-
-
-
-async function  startBot(){ 
-        bot.on( "message", async msg=>{ 
-        const text=  msg.text;
-        const chatId=msg.chat.id
-
-        console.log(msg)
-        if(text.toLowerCase()==="привет"){
-    
-        await bot.sendMessage(chatId, `Привет, что надо?`)
-        return 
-        }
-        await bot.sendMessage(chatId, `you texted ${text}`)
-    }
-    )
-} 
+app.use(express.urlencoded({extended:true}))
+app.use(cookieParser())
 
 app.use("/api", userRouter)
+app.use("/api", PostController )
+
+app.use("/apiv/",userRoutes )
+
+db.sequelize.sync({ force: false }).then(() => {
+    console.log("db has been re sync")
+})
 
 async function startApp(){ 
     try{ 
