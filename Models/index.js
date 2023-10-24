@@ -16,5 +16,6 @@ db.Sequelize=Sequelize
 db.sequelize=sequelize
 
 db.users=require("./userModel")(sequelize, DataTypes)
+db.accessToken= require('./tokenModel')(sequelize,DataTypes)
 
 module.exports=db
