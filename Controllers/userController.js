@@ -116,10 +116,10 @@ const checkAuth= async (req, res)=>{
         }
  }
     
-    const logout=async(req, res)=>{ 
+    const logout=async(req, res, next)=>{ 
         try {
-            const accessToken=req.cookies.jwt
-            console.log(accessToken, "!!!!!!")
+            const {jwt}=req.cookies
+            console.log(jwt, "!!!!!!")
             res.clearCookie(accessToken)
             await db.accessToken.destroy({
                 where:{
@@ -127,11 +127,11 @@ const checkAuth= async (req, res)=>{
                 }
             })
         }catch(e){
-            console.log(e)
+            next(e)
         }
 
     }
-
+     
 
 module.exports={ 
     signup,
