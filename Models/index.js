@@ -18,5 +18,6 @@ db.sequelize=sequelize
 db.users=require("./userModel")(sequelize, DataTypes)
 db.accessToken= require('./tokenModel')(sequelize,DataTypes)
 db.message=require("./messageModels")(sequelize, DataTypes)
+db.conversations=require("./conversationModels")(sequelize,DataTypes)
 
 module.exports=db

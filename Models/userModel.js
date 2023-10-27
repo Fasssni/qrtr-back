@@ -30,9 +30,9 @@ module.exports=(sequelize, DataTypes)=>{
     },
    
     )
-    User.associate = (models) => {
+    User.associate = (model) => {
         // Define associations, e.g., a user has many messages
-        User.hasMany(models.Message);
+        User.hasMany(db.conversations);
       }
     return User
 

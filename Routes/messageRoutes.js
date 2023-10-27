@@ -8,6 +8,7 @@ const {sendMessage, getMessages}=tgControllers
 
 router.post("/sendmessage", sendMessage)
 router.get("/getmgs", getMessages)
+router.post("createbot", tgControllers.createBot)
 
 module.exports=router
 
