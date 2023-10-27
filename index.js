@@ -38,10 +38,7 @@ db.sequelize.sync({ force: false }).then(() => {
     console.log("db has been re sync")
 })
 
-process.on('SIGINT', () => {
-    // Perform cleanup tasks here
-    process.exit(0);
-  });
+
 
 async function startApp(){ 
     try{ 

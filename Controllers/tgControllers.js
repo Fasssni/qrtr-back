@@ -6,14 +6,16 @@ const bot=new TelegramApi (token,{polling: true})
 
 
 const sendMessage= async (req,res,next)=>{ 
-
+        
          try{
-         
-         const message= await bot.sendMessage(1262220872, req.body.message)
-         const data= await db.message.create({user_id:1,text:message.text,  name:req.body.name})
-         res.json(message)
-         console.log(data)
+            const {id}=req.query
+            const message= await bot.sendMessage(1164345495, req.body.message)
+            const data= await db.message.create({user_id:1,text:req.body.message,  name:req.body.name, conversation_id:id})
+            res.status(200).json(message)
+            console.log(message)
          }catch(e){ 
+            console.log(e)
+            res.status(501).json(e.message)
             
          }
 }
@@ -45,6 +47,15 @@ const catchMessage=async(req, res)=>{
     
 }
 
+// const getUserPhoto=async (id)=>{ 
+//     try{ 
+//         const userPhoto=await bot.getUserProfilePhotos(1164345495)
+//         console.log(userPhoto.photos)
+//     }catch(e){
+//          console.log(e)
+//     }
+// }
+
 const getMessages = async (req, res) => {
     try {
         const messages = await db.message.findAll({
@@ -57,7 +68,33 @@ const getMessages = async (req, res) => {
         console.error(e);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-};
+}; 
+
+  const getConversations=async (req, res)=>{ 
+    try{ 
+        const conversations=await db.conversations.findAll()
+        res.status(200).json(conversations)
+
+    }catch(e){ 
+        res.status(501).json("Something went wrong on the server")
+
+    }
+  }
+  
+   const getUserChat=async(req, res)=>{
+     try{
+         const {id}=req.query
+         const chat= await db.message.findAll({
+            where:{
+                conversation_id:id
+            }
+         })
+         res.status(200).json(chat)
+        }catch(e){ 
+          res.status(501).json(e)
+        }
+   }
+
 
 const createBot=async(req, res)=>{
     const response=req.body.cookies
@@ -71,6 +108,8 @@ module.exports={
     sendMessage,
     catchMessage,
     getMessages,
-    createBot
+    createBot,
+    getConversations,
+    getUserChat,
 
 }

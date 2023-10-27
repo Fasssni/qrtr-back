@@ -4,11 +4,14 @@ const tgControllers=require('../Controllers/tgControllers')
 
 const router=express.Router()
 
-const {sendMessage, getMessages}=tgControllers
+const {sendMessage, getMessages, getConversations,getUserChat}=tgControllers
 
 router.post("/sendmessage", sendMessage)
+
 router.get("/getmgs", getMessages)
-router.post("createbot", tgControllers.createBot)
+router.get('/conversations',getConversations)
+router.get('/getchat/', getUserChat)
+
 
 module.exports=router
 
