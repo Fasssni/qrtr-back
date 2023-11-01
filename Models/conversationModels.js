@@ -16,7 +16,11 @@ module.exports=(sequelize, DataTypes)=>{
         client_name:{ 
             type: DataTypes.STRING,
             allowNull:true,
-          }
+          },
+        user_pic:{ 
+            type:DataTypes.STRING,
+            allowNull:true,
+        }
         },
         {timestaps:true}
      )

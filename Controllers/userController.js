@@ -86,7 +86,7 @@ try{
  }
 }
 
-const checkAuth= async (req, res)=>{
+ const checkAuth= async (req, res)=>{
 
     const accessToken=req.cookies.jwt
     if(!accessToken){

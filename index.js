@@ -13,6 +13,7 @@ const userRoutes=require("./Routes/userRoutes.js")
 const db = require('./Models/index.js')
 const startBot = require('./store/bot.js')
 const { catchMessage } = require('./Controllers/tgControllers.js')
+const getUserChatWebSocket = require('./WebSockets/websocket.js')
 
 const PORT=process.env.PORT||3000
 
@@ -45,6 +46,7 @@ async function startApp(){
         
         app.listen(PORT,console.log(`it's all started at ${PORT}`))
         await catchMessage()
+        
         
         
 

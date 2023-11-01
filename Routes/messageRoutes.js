@@ -10,7 +10,7 @@ router.post("/sendmessage", sendMessage)
 
 router.get("/getmgs", getMessages)
 router.get('/conversations',getConversations)
-router.get('/getchat/', getUserChat)
+router.get('/getchat/:id', getUserChat)
 
 
 module.exports=router
