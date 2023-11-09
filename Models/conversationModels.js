@@ -28,7 +28,16 @@ module.exports=(sequelize, DataTypes)=>{
             model:"botTokens", 
             key:"id",
           }
-        }
+        },
+        bot_name:{ 
+          allowNull:true, 
+          type:DataTypes.STRING
+        },
+        
+         channel:{ 
+          type:DataTypes.STRING, 
+          allowNull:false,
+         }
         },
         {timestaps:true}
      )
@@ -46,11 +55,7 @@ module.exports=(sequelize, DataTypes)=>{
             }
           })
 
-          Conversation.hasOne(db.botToken, { 
-            foreignKey:{
-                allowNull:true,
-            }
-          })
+         
         };
       
 

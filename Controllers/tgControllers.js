@@ -139,7 +139,9 @@ const catchMessage=async(req, res, next)=>{
                       to_id:message.from.id, 
                       client_name:message.from.first_name,
                       user_pic:imageUrl,
-                      bot_id:botdb.id
+                      bot_id:botdb.id,
+                      bot_name:botdb.name,
+                      channel:'telegram',
                        
                   })
                   const data=await db.message.create({
@@ -157,7 +159,9 @@ const catchMessage=async(req, res, next)=>{
                     to_id:message.from.id, 
                     client_name:message.from.first_name,
                     user_pic:null,
-                    bot_id:botdb.id
+                    bot_id:botdb.id,
+                    bot_name:botdb.name,
+                    channel:'telegram',
                 })
                 const data=await db.message.create({
                     user_id:1, 
