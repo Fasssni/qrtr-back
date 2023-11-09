@@ -30,9 +30,11 @@ module.exports=(sequelize, DataTypes)=>{
     },
    
     )
-    User.associate = (model) => {
+    User.associate = () => {
         // Define associations, e.g., a user has many messages
         User.hasMany(db.conversations);
+        User.hasMany(db.botToken)
+        
       }
     return User
 

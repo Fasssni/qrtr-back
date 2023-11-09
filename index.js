@@ -12,8 +12,9 @@ const PostController=require("./store/routes/post.routes.js")
 const userRoutes=require("./Routes/userRoutes.js")
 const db = require('./Models/index.js')
 const startBot = require('./store/bot.js')
-const { catchMessage } = require('./Controllers/tgControllers.js')
+const { catchMessage, createBotInstance} = require('./Controllers/tgControllers.js')
 const getUserChatWebSocket = require('./WebSockets/websocket.js')
+
 
 const PORT=process.env.PORT||3000
 

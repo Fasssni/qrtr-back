@@ -1,6 +1,7 @@
 const ws = require('ws');
 
-const db=require("../Models")
+const db=require("../Models");
+const { getConversations } = require('../Controllers/tgControllers');
 
 const wss = new ws.Server({
     port: 5001,
@@ -15,12 +16,16 @@ wss.on('connection', function connection(ws) {
         switch (message.method) {
             case 'message':
                 handleClientMessage(message)
-                console.log(message)
                 break;
             case 'chat-connection':
                 getUserChat(message)
                 break;
+            case "conversations":
+                handleConversations(message.user_id)
+                break;
+            
         }
+
     })
 })
 
@@ -46,10 +51,24 @@ async function  getUserChat({user_id, conversation_id}){
 
 function handleClientMessage(message){ 
     wss.clients.forEach((client)=>{
-        client.send(JSON.stringify(message.message))
+        client.send(JSON.stringify(message))
     })
 
 }
 
+async function  handleConversations(user_id){
+    const conversations=await db.conversations.findAll({
+        where:{
+          user_id:user_id
+        }}
+      )
+   
+     wss.clients.forEach((client)=>{ 
+        if(user_id===client.id){ 
+            client.send(JSON.stringify({method:"conversations",conversations}))
+        }
+        
+     })
+}
 
 module.exports=wss

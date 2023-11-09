@@ -20,6 +20,14 @@ module.exports=(sequelize, DataTypes)=>{
         user_pic:{ 
             type:DataTypes.STRING,
             allowNull:true,
+        }, 
+        bot_id:{ 
+          allowNull:true, 
+          type:DataTypes.INTEGER,
+          references:{ 
+            model:"botTokens", 
+            key:"id",
+          }
         }
         },
         {timestaps:true}
@@ -35,6 +43,12 @@ module.exports=(sequelize, DataTypes)=>{
           Conversation.hasMany(db.message, { 
             foreignKey:{
                 allowNull:false,
+            }
+          })
+
+          Conversation.hasOne(db.botToken, { 
+            foreignKey:{
+                allowNull:true,
             }
           })
         };
