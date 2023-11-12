@@ -133,19 +133,19 @@ const catchMessage=async(req, res, next)=>{
             }else{ 
               const imageUrl = await getUserPhoto(message.from.id, bot.token);
               console.log(imageUrl)
-              if(imageUrl){ 
+
                   const conversation=await db.conversations.create({
-                      user_id:1, 
+                      user_id:botdb.user_id, 
                       to_id:message.from.id, 
                       client_name:message.from.first_name,
-                      user_pic:imageUrl,
+                      user_pic:imageUrl||undefined,
                       bot_id:botdb.id,
                       bot_name:botdb.name,
                       channel:'telegram',
                        
                   })
                   const data=await db.message.create({
-                      user_id:1, 
+                      user_id:botdb.user_id,
                       text:message.text, 
                       name:message.from.first_name, 
                       conversation_id:conversation.id,
@@ -153,25 +153,6 @@ const catchMessage=async(req, res, next)=>{
                   })
                   socketConvHandler(conversation)
                   socketMessageHandler(data)
-                }else{ 
-                  const conversation=await db.conversations.create({
-                    user_id:1, 
-                    to_id:message.from.id, 
-                    client_name:message.from.first_name,
-                    user_pic:null,
-                    bot_id:botdb.id,
-                    bot_name:botdb.name,
-                    channel:'telegram',
-                })
-                const data=await db.message.create({
-                    user_id:1, 
-                    text:message.text, 
-                    name:message.from.first_name, 
-                    conversation_id:conversation.id,
-                })
-                socketConvHandler(conversation)
-                socketMessageHandler(data)
-                }
   
             }  
           
@@ -284,23 +265,56 @@ const getMessages = async (req, res) => {
         }
    }
 
-
-const createBot=async(req, res)=>{
-    const response=req.body.cookies
-    console.log(response)
-     
-
-}
-
+   const clearChat=async (req, res)=>{ 
+    try{
+      const {conv_id}=req.query; 
+      if(!conv_id){
+        res.status(401).json("no query")
+   
+      }
+      await db.message.destroy({
+        where:{ 
+          conversation_id:conv_id,
+        }
+      })
+      res.status(201).json("The chat has been cleared!")
+    }catch(e){ 
+      res.status(501).json("Something went wrong")
+    }
+   }
+    
+   const removeChat=async(req,res)=>{
+    try{
+      const {conv_id}=req.query
+      if(!conv_id){
+        res.status(401).json("no query")
+      }
+      await db.message.destroy({
+        where:{ 
+          conversation_id:conv_id,
+        }
+      })
+      await db.conversations.destroy({
+        where:{
+          id:conv_id
+        }
+      })
+      res.status(201).json("Success")
+    }catch(e){
+       res.status(500).json(e)
+    }
+   }
 
 
 module.exports={ 
     sendMessage,
     catchMessage,
     getMessages,
-    createBot,
+  
     getConversations,
     getUserChat,
     createBotInstance,
+    clearChat,
+    removeChat
 
 }

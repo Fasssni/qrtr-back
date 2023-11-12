@@ -35,10 +35,22 @@ function broadcastMessage(message) {
     })
 }
 
-async function  getUserChat({user_id, conversation_id}){  
+async function  getUserChat({user_id, conversation_id}){
+    
+    const conversation= await db.conversations.findOne({ 
+        where:{ 
+            id:conversation_id
+        }
+    })
+
+    if(conversation.user_id!==user_id){
+       return
+    }
+
     const messages= await db.message.findAll({
         where:{
-            conversation_id:conversation_id
+            conversation_id:conversation_id, 
+            user_id:user_id,
         }
     }
     )

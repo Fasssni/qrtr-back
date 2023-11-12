@@ -20,6 +20,27 @@ const saveUser=async(req, res,next)=>{
     
 }
 
+ const getChat=async (user_id, id)=>{ 
+    try{
+        const {user_id}=req.query
+        const {id}=req.params
+        const conversation= await db.conversations.findOne({ 
+            where:{ 
+                id:id
+            }
+        })
+
+        if(conversation.user_id!==user_id){
+            res.status(403). json("you don't have an access to this conversation")
+        }
+
+    }catch(e){
+        res.status(500).json(e)
+
+    }
+ }
+
 module.exports={ 
     saveUser,
+    getChat
 }

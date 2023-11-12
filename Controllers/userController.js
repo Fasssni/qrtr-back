@@ -74,11 +74,11 @@ try{
 
          return res.status(201).json({user, accessToken})
        }else{ 
-        return res.json(401).send("the password is incorrect:(")
+        return res.status(401).json("the password is incorrect:(")
        }
      
     }else{ 
-        res.json(401).json("no such user exists")
+        res.status(401).json("no such user exists")
     }}
  catch(e){ 
     console.log(e)
@@ -120,10 +120,10 @@ try{
         try {
             const {jwt}=req.cookies
             console.log(jwt, "!!!!!!")
-            res.clearCookie(accessToken)
+            res.clearCookie("jwt")
             await db.accessToken.destroy({
                 where:{
-                    accessToken:accessToken
+                    accessToken:jwt
                 }
             })
         }catch(e){
