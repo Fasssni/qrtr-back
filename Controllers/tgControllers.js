@@ -151,7 +151,7 @@ const catchMessage=async(req, res, next)=>{
                       conversation_id:conversation.id,
                     
                   })
-                  socketConvHandler(conversation)
+                  socketConvHandler(conversation, botdb.user_id)
                   socketMessageHandler(data)
   
             }  
@@ -166,10 +166,12 @@ const catchMessage=async(req, res, next)=>{
 }
 
 
-const socketConvHandler=(value)=>{ 
+const socketConvHandler=(value, user_id)=>{ 
   
-  wss.clients.forEach(client => {
+  wss.clients.forEach((client) => {
+    if(client.id===user_id){
     client.send(JSON.stringify({method:"new-conversation", message:value}))
+  }
 })    
 }
 

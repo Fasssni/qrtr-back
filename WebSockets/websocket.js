@@ -43,7 +43,7 @@ async function  getUserChat({user_id, conversation_id}){
         }
     })
 
-    if(conversation.user_id!==user_id){
+    if(conversation&&conversation.user_id!==user_id){
        return
     }
 

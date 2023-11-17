@@ -6,32 +6,24 @@ const env=require("dotenv").config()
 
 
 const User=db.users;
+const {generateAccessToken, saveAccessToken}=require("../Services/TokenService")
+const UserService=require("../Services/UserService")
 
 
 const signup=async (req, res)=>{ 
 try{ 
         const {name, surname, email, password}=req.body
-        const data={ 
-            name,
-            surname,
-            email,
-            password: await bcrypt.hash(password, 10)
-        }
-        const user= await User.create(data);
-
-        if(user){ 
-            let token= jwt.sign({id:user.id}, process.env.secretKey,{ 
-                expiresIn:1*24*60*60*1000,
+           const {accessToken, user}=
+            UserService.signup({
+                    name, 
+                    surname, 
+                    email, 
+                    password
             })
-            const {id}=user
-            const accessToken= await db.accessToken.create({user_id:id,accessToken:token})
-            res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true});
+            res.cookie("jwt", accessToken, { maxAge: 1 * 24 * 60 * 60, httpOnly: true});
             console.log("user",JSON.stringify(user, null, 2));
-            console.log(token);
+            console.log(accessToken);
             return res.json(201).send(user)
-        }else{ 
-            return res.status(409).send("Details aren't correct")
-        }
     }catch(e){
         console.log(e)
     }
@@ -78,7 +70,7 @@ try{
        }
      
     }else{ 
-        res.status(401).json("no such user exists")
+        return res.status(401).json("no such user exists")
     }}
  catch(e){ 
     console.log(e)
@@ -90,12 +82,9 @@ try{
 
     const accessToken=req.cookies.jwt
     if(!accessToken){
-        return res.status(403).json("Unautorized")
+        return res.status(401).json("Unautorized")
     }
-    
-
     try{
-        
         const token=await db.accessToken.findOne({
             where: {
                 accessToken: accessToken
@@ -107,12 +96,12 @@ try{
                     id:token.user_id
                 }
             })
-            res.status(201).json(new UserDto(userData))
+            return res.status(201).json(new UserDto(userData))
         }else{ 
-            res.status(403).json("Unauthorized")
+            return res.status(401).json("Unauthorized")
              }
         }catch(err){ 
-            res.status(402).json("сука")
+            return res.status(402).json("сука")
         }
  }
     
@@ -126,6 +115,7 @@ try{
                     accessToken:jwt
                 }
             })
+            res.status(201).json("You've been logged out")
         }catch(e){
             next(e)
         }
