@@ -1,29 +1,46 @@
-const jwt=require('jsonwebtoken');
-const env=require("dotenv").config()
-const db=require("../Models")
+const jwt = require('jsonwebtoken');
+const env = require("dotenv").config()
+const db = require("../Models")
 
-class TokenService{
+class TokenService {
 
-    generateAccessToken(id){ 
-        const accessToken= jwt.sign({id:id}, process.env.secretKey,{ 
-            expiresIn:1*24*60*60*1000,
+    generateAccessToken(id) {
+        const accessToken = jwt.sign({ id: id }, process.env.secretKey, {
+            expiresIn: 1 * 24 * 60 * 60 * 1000,
         })
 
         return accessToken
-        
+
     }
-     async saveAccessToken(token,id){ 
-      await db.accessToken.create({user_id:id,accessToken:token})
+    async saveAccessToken(token, id) {
+        await db.accessToken.create({ user_id: id, accessToken: token })
     }
 
-    async findAccessToken(id){
-        const accessToken= await db.accessToken.findOne({
-            where:{
-                user_id:id
+    async findAccessTokenById(id) {
+        const accessToken = await db.accessToken.findOne({
+            where: {
+                user_id: id
             }
         })
         return accessToken
     }
+
+    async findAccessToken(token){ 
+        const accessToken = await db.accessToken.findOne({
+            where: {
+                accessToken: token
+            }
+        })
+        return accessToken
+    }
+    
+    async destroyAccessToken(token){
+        await db.accessToken.destroy({
+            where: {
+                accessToken: token
+            }
+        })
+    }
 }
 
-module.exports=new TokenService()
+module.exports = new TokenService()
