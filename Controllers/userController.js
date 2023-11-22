@@ -38,7 +38,7 @@ const login = async (req, res) => {
         return res.status(201).json({token, user})
     }
     catch (e) {
-        console.log(e)
+        res.status(401).json(e)
 
     }
 }

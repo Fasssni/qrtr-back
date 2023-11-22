@@ -1,42 +1,29 @@
 const TelegramApi = require("node-telegram-bot-api")
+
 const db = require("../Models")
-
 const wss = require("../WebSockets/websocket")
-// const bot=new TelegramApi (token,{polling: true})
 
-const { checkAuth } = require("./userController")
+const BotService=require("../Services/BotService")
+
 const PORT = process.env.PORT
 
 let botInstance = null
 
 const createBotInstance = async (req, res) => {
-  const { user_id } = req.query
-  const { token } = req.body
+  try{
+      const { user_id } = req.query
+      const { token } = req.body
 
-  const isToken = await db.botToken.findOne({
-    where: {
-      token: token
-    }
-  })
-
-  if (isToken) {
-    res.status(401).json(isToken)
-  } else {
-    const newBot = new TelegramApi(token, { polling: true })
-    const { username } = await newBot.getMe()
-    await newBot.stopPolling()
-    const botToken = await db.botToken.create({
-      token: token,
-      user_id: user_id,
-      name: username,
-
-    })
-    botInstance = null
-    await catchMessage()
-    res.status(201).json(botToken)
+      const botToken=await BotService.createBotInstance(user_id,token)
+      botInstance = null
+      await catchMessage()
+      return res.status(201).json(botToken)
+  }catch(e){ 
+      res.status(500).json(e)
   }
+  
 
-  return
+ 
 
 
 }
@@ -47,7 +34,19 @@ const startBots = async () => {
       const botsDB = await db.botToken.findAll()
       const botsTG = botsDB.map((bot) => new TelegramApi(bot.token, { polling: true }))
       botInstance = { botsDB, botsTG }
+    }else{ 
+        const botsDB = await db.botToken.findAll()
+        const newBotsDB = botsDB.filter((dbBot) =>
+        botInstance.botsDB.every((instanceBot) => instanceBot.id !== dbBot.id)
+      );
+
+      const newBotsTG = newBotsDB.map((newBot) => new TelegramApi(newBot.token, { polling: true }));
+      botInstance = {
+        botsDB: [...botInstance.botsDB, ...newBotsDB],  
+        botsTG: [...botInstance.botsTG, ...newBotsTG],  
     }
+  }
+    console.log("BOT INSTANCES", botInstance)
     return botInstance
   } catch (e) {
     console.log(e)
