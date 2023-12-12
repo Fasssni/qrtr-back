@@ -10,6 +10,7 @@ const userRouter= require("./store/routes/user.routes.js")
 const messageRoutes=require("./Routes/messageRoutes.js")
 const PostController=require("./store/routes/post.routes.js")
 const userRoutes=require("./Routes/userRoutes.js")
+const interfaceRoutes=require("./Routes/interfaceRoutes.js")
 const db = require('./Models/index.js')
 const startBot = require('./store/bot.js')
 const { catchMessage, createBotInstance} = require('./Controllers/tgControllers.js')
@@ -31,9 +32,9 @@ app.use(express.urlencoded({extended:true}))
 
 
 app.use("/api", userRouter)
-app.use("/api", PostController )
 
-app.use("/apiv/",userRoutes )
+
+app.use("/apiv/",userRoutes,interfaceRoutes)
 app.use("/tg/", messageRoutes)
 
 db.sequelize.sync({ force: false }).then(() => {
@@ -46,7 +47,7 @@ async function startApp(){
     try{ 
         
         app.listen(PORT,console.log(`it's all started at ${PORT}`))
-        await catchMessage()
+        // await catchMessage()
         
         
         

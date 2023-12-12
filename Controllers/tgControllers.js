@@ -4,7 +4,8 @@ const db = require("../Models")
 const wss = require("../WebSockets/websocket")
 
 const BotService=require("../Services/BotService")
-
+const InterfaceService=require("../Services/InterfaceService")
+const { InstanceError } = require("sequelize")
 const PORT = process.env.PORT
 
 let botInstance = null
@@ -104,6 +105,7 @@ const catchMessage = async (req, res, next) => {
 
   try {
     botsTG.forEach((bot) => {
+     
       bot.on("message", async message => {
         console.log(bot)
         const botdb = await db.botToken.findOne({
@@ -119,6 +121,7 @@ const catchMessage = async (req, res, next) => {
             bot_id: botdb.id
           }
         })
+        
         if (isConversation) {
           const data = await db.message.create({
             user_id: isConversation.user_id,
@@ -154,7 +157,10 @@ const catchMessage = async (req, res, next) => {
         }
 
       })
+   
     })
+  
+    
 
   } catch (e) {
     console.log(e)
@@ -305,6 +311,19 @@ const removeChat = async (req, res) => {
   }
 }
 
+const getChannels=async (req, res)=>{ 
+     try{ 
+      const {id}=req.query
+      const existingChannels= await InterfaceService.getChannels(id)
+      return res.status(200).json(existingChannels)
+     }catch(e){ 
+       console.log(e)
+       res.status(501).json(e)
+     }
+     
+
+}
+
 
 module.exports = {
   sendMessage,
@@ -315,6 +334,7 @@ module.exports = {
   getUserChat,
   createBotInstance,
   clearChat,
-  removeChat
+  removeChat, 
+  getChannels,
 
 }
