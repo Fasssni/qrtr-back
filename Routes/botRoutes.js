@@ -11,7 +11,8 @@ const {
   getUserChat,
   createBotInstance,
   clearChat,
-  removeChat
+  removeChat, 
+  deleteBot
 } = tgControllers
 
 router.post("/sendmessage", sendMessage)
@@ -22,6 +23,7 @@ router.get('/getchat/:id', getUserChat)
 router.post(`/createbot`, createBotInstance)
 router.delete("/clearchat", clearChat)
 router.delete("/removechat", removeChat)
+router.delete("/deletebot",deleteBot)
 
 
 module.exports = router

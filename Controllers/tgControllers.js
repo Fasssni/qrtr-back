@@ -6,9 +6,11 @@ const wss = require("../WebSockets/websocket")
 const BotService=require("../Services/BotService")
 const InterfaceService=require("../Services/InterfaceService")
 const { InstanceError } = require("sequelize")
-const PORT = process.env.PORT
+const ConversationService = require("../Services/ConversationService")
+const { checkAuth } = require("./userController")
 
-let botInstance = null
+
+let botInstance = null;
 
 const createBotInstance = async (req, res) => {
   try{
@@ -16,7 +18,7 @@ const createBotInstance = async (req, res) => {
       const { token } = req.body
 
       const botToken=await BotService.createBotInstance(user_id,token)
-      botInstance = null
+      
       await catchMessage()
       return res.status(201).json(botToken)
   }catch(e){ 
@@ -46,6 +48,7 @@ const startBots = async () => {
         botsDB: [...botInstance.botsDB, ...newBotsDB],  
         botsTG: [...botInstance.botsTG, ...newBotsTG],  
     }
+      console.log(botInstance)
   }
     console.log("BOT INSTANCES", botInstance)
     return botInstance
@@ -56,65 +59,19 @@ const startBots = async () => {
 
 
 
-
-console.log(botInstance, "bots started!")
-
-const sendMessage = async (req, res, next) => {
-
-
-  try {
-    const { id } = req.query
-    const { user_id, text, name, to_id } = req.body
-    const { botsTG, botsDB } = await startBots()
-    const conversation = await db.conversations.findOne({
-      where: {
-        id: id
-      }
-    })
-    console.log(conversation)
-    // const botdb= db.botToken.findOne({ 
-    //   where:{
-    //     id:conversation.bot_id
-    //   }
-    // })
-    const botdb = botsDB.find(item => item.id === conversation.bot_id)
-    const bot = botsTG.find(item => item.token === botdb.token)
-    console.log(botsTG, "gegeg")
-    const message = await bot.sendMessage(to_id, text)
-    const data = await db.message.create({
-      user_id: user_id,
-      text: text,
-      name: name,
-      conversation_id: id
-    })
-    res.status(200).json(data)
-    socketMessageHandler(data)
-
-  } catch (e) {
-    console.log(e)
-    res.status(501).json(e.message)
-
-  }
-}
-
-
-
-
-const catchMessage = async (req, res, next) => {
-  const { botsTG } = await startBots()
-
+const catchMessage = async () => {
+   const {botsTG}= await startBots()
   try {
     botsTG.forEach((bot) => {
      
-      bot.on("message", async message => {
-        console.log(bot)
+      bot.on("message", async (message) => {
+    
         const botdb = await db.botToken.findOne({
           where: {
             token: bot.token
           }
         })
-        const getMe = await bot.getMe()
-        console.log(getMe, "Getme")
+        
         const isConversation = await db.conversations.findOne({
           where: {
             to_id: message.from.id,
@@ -159,15 +116,47 @@ const catchMessage = async (req, res, next) => {
       })
    
     })
-  
-    
-
   } catch (e) {
     console.log(e)
-    next(e)
+   
   }
 }
 
+
+
+
+const sendMessage = async (req, res, next) => {
+  
+  try {
+    const { id } = req.query
+    const { user_id, text, name, to_id } = req.body
+    const { botsTG, botsDB } = botInstance
+    const conversation = await db.conversations.findOne({
+      where: {
+        id: id
+      }
+    })
+    console.log(conversation)
+   
+    const botdb = botsDB.find(item => item.id === conversation.bot_id)
+    const bot = botsTG.find(item => item.token === botdb.token)
+    console.log(botsTG, "gegeg")
+    const message = await bot.sendMessage(to_id, text)
+    const data = await db.message.create({
+      user_id: user_id,
+      text: text,
+      name: name,
+      conversation_id: id
+    })
+    res.status(200).json(data)
+    socketMessageHandler(data)
+
+  } catch (e) {
+    console.log(e)
+    res.status(501).json(e.message)
+
+  }
+}
 
 const socketConvHandler = (value, user_id) => {
 
@@ -295,16 +284,7 @@ const removeChat = async (req, res) => {
     if (!conv_id) {
       res.status(401).json("no query")
     }
-    await db.message.destroy({
-      where: {
-        conversation_id: conv_id,
-      }
-    })
-    await db.conversations.destroy({
-      where: {
-        id: conv_id
-      }
-    })
+    await ConversationService.removeChat(conv_id)
     res.status(201).json("Success")
   } catch (e) {
     res.status(500).json(e)
@@ -313,6 +293,7 @@ const removeChat = async (req, res) => {
 
 const getChannels=async (req, res)=>{ 
      try{ 
+      
       const {id}=req.query
       const existingChannels= await InterfaceService.getChannels(id)
       return res.status(200).json(existingChannels)
@@ -320,10 +301,30 @@ const getChannels=async (req, res)=>{
        console.log(e)
        res.status(501).json(e)
      }
-     
-
 }
 
+const deleteBot=async(req, res)=>{ 
+  try{ 
+    const {id}=req.query
+    
+    const {token}=await BotService.getBotById(id)
+    botInstance.botsTG=botInstance.botsTG.filter((bot)=>{ 
+            if(bot.token===token){ 
+              bot.stopPolling()
+              
+              return false
+            } 
+            return true
+          })
+
+    const deletedBot= await BotService.deleteBot(id)
+    console.log(botInstance.botsTG, "TEST")
+    res.status(200).json(deletedBot)
+  }catch(e){
+    res.status(501).json(e)
+    console.log(e)
+  }
+}
 
 module.exports = {
   sendMessage,
@@ -336,5 +337,8 @@ module.exports = {
   clearChat,
   removeChat, 
   getChannels,
+  startBots,
+  deleteBot,
+
 
 }

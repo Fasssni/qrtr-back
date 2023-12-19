@@ -1,4 +1,6 @@
 const db = require("../Models")
+const {removeMessagesByConvId}=require("../Services/MessageService")
+
 class ConversationsService {
     async getConversations(user_id) {
       try {
@@ -57,6 +59,25 @@ class ConversationsService {
       } catch (e) {
         throw new Error("Error removing chat");
       }
+    }
+    async removeChatByBotId(bot_id){ 
+      try{
+      const chats=await db.conversations.findAll({
+          where:{ 
+            bot_id
+          }
+      })
+      chats.forEach(async (chat)=>{
+          await removeMessagesByConvId (chat.id)
+      })
+      await db.conversations.destroy({
+        where:{ 
+          bot_id:bot_id
+        }
+      })
+    }catch(e){
+      console.log(e)
+    }
     }
   }
   

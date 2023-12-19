@@ -1,10 +1,12 @@
+const env=require("dotenv").config()
+
 const ws = require('ws');
 
 const db=require("../Models");
 const { getConversations } = require('../Controllers/tgControllers');
 
 const wss = new ws.Server({
-    port: 5001,
+    port: process.env.WSSport,
 }, () => console.log(`Server started on 5001`))
 
 

@@ -1,6 +1,8 @@
 const TelegramApi = require("node-telegram-bot-api"); 
 const db = require("../Models")
  
+const {removeChatByBotId}=require("../Services/ConversationService")
+
 
 class BotService {
     async createBotInstance(user_id, token) {
@@ -13,11 +15,8 @@ class BotService {
       if (isToken) {
          throw new Error("The Bot has already been connected");
       } else {
-        const newBot = new TelegramApi(token, { polling: true });
-        const { username } = await newBot.getMe();
-        await newBot.stopPolling({
-            cancel:true
-        });
+        const newBot = new TelegramApi(token, { polling: false });
+        const { username } =  await newBot.getMe();
         const botToken = await db.botToken.create({
           token: token,
           user_id: user_id,
@@ -36,7 +35,36 @@ class BotService {
           throw new Error("Error starting bots");
         }
       }
+
+
+      async deleteBot(id){ 
+        try{ 
+           await removeChatByBotId(id)
+           const deletedBot=await db.botToken.destroy({
+                where:{ 
+                  id:id
+                }
+           })
+           return deletedBot
+        }catch(e){
+           console.log(e)
+        }
+      }
+    
+
+    async getBotById(id){ 
+      try{ 
+        const bot=await db.botToken.findOne({ 
+            where:{
+              id:id
+            }
+        })
+        return bot
+      }catch(e){ 
+
+      }
     }
+}
     
 module.exports = new BotService();
     
