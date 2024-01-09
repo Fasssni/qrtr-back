@@ -88,7 +88,8 @@ const catchMessage = async () => {
           })
           socketMessageHandler(data)
         } else {
-          const imageUrl = await getUserPhoto(message.from.id, bot.token);
+          const imageUrl = await getUserPhoto(message.from.id, bot);
+        
           console.log(imageUrl)
 
           const conversation = await db.conversations.create({
@@ -159,7 +160,6 @@ const sendMessage = async (req, res, next) => {
 }
 
 const socketConvHandler = (value, user_id) => {
-
   wss.clients.forEach((client) => {
     if (client.id === user_id) {
       client.send(JSON.stringify({ method: "new-conversation", message: value }))
@@ -174,10 +174,8 @@ const socketMessageHandler = (value) => {
   })
 }
 
-const getUserPhoto = async (client_id, token) => {
+const getUserPhoto = async (client_id, bot) => {
   try {
-    const { botsTG } = await startBots()
-    const bot = botsTG.find((item) => item.token === token)
     const profile = await bot.getUserProfilePhotos(client_id, { limit: 1 });
 
     const profilePic = profile.photos
@@ -185,7 +183,7 @@ const getUserPhoto = async (client_id, token) => {
 
     if (profilePic.length > 0) {
       const file_id = profilePic[0][0]?.file_id;
-      const getFileUrl = `https://api.telegram.org/bot${token}/getFile?file_id=${file_id}`;
+      const getFileUrl = `https://api.telegram.org/bot${bot.token}/getFile?file_id=${file_id}`;
       console.log(getFileUrl)
       const urlResponse = await fetch(getFileUrl);
 
@@ -193,7 +191,7 @@ const getUserPhoto = async (client_id, token) => {
         const fileInfo = await urlResponse.json();
 
         if (fileInfo.ok) {
-          const imageUrl = `https://api.telegram.org/file/bot${token}/${fileInfo.result.file_path}`;
+          const imageUrl = `https://api.telegram.org/file/bot${bot.token}/${fileInfo.result.file_path}`;
           console.log(imageUrl)
           return imageUrl;
         } else {

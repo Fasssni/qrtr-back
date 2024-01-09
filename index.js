@@ -13,7 +13,7 @@ const TelegramApi = require("node-telegram-bot-api")
 
 
 const PORT=process.env.PORT||3000
-const WBhost=process.env.WEBSOCKET
+const WBhost=process.env.WEBHOST
 
 const app=express()
 

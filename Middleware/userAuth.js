@@ -12,7 +12,7 @@ const saveUser=async(req, res,next)=>{
                 email:req.body.email
             }
         })
-        if(emailcheck)return res.json(409).send("The email has already been taken :<")
+        if(emailcheck)return res.status(401).json({error:"The e-mail has already been taken"})
         next()
     }catch(err){ 
         console.log(err)

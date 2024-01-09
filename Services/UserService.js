@@ -11,11 +11,14 @@ const User = db.users;
 
 class UserService {
     async signup({ name, surname, email, password }) {
+
+        console.log("WORKEEEEDE")
         const isUser = await User.findOne({
             where: {
                 email: email
             }
         })
+        console.log(isUser, "USEEEEEEEEEEEEEEEEEER")
 
         if (!isUser) {
             const data = {
@@ -30,6 +33,7 @@ class UserService {
             saveAccessToken(accessToken, id)
             return { accessToken, user }
         } else {
+            console.log("ERROR")
             throw new Error("The e-mail has already been taken")
         }
 

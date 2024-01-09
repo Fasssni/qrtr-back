@@ -14,18 +14,17 @@ const signup = async (req, res) => {
     try {
         const { name, surname, email, password } = req.body
         const { accessToken, user } =
-            UserService.signup({
-                name,
-                surname,
-                email,
-                password
-            })
-        res.cookie("jwt", accessToken, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
-        console.log("user", JSON.stringify(user, null, 2));
-        console.log(accessToken);
-        return res.json(201).send(user)
+            await UserService.signup({
+                    name,
+                    surname,
+                    email,
+                    password
+                })
+        res.status(201).json(user)
     } catch (e) {
         console.log(e)
+        const errorMessage=e.message||"Something went wrong"
+        res.status(401).json({error: errorMessage})
     }
 }
 
@@ -33,12 +32,15 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body
         const {token, user}= await UserService.login({email, password})
-        res.cookie('jwt', token, { maxAge: 1 * 24 * 60 * 60 * 100, httpOnly: true })
+        res.cookie('jwt', token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true })
         console.log("user", JSON.stringify(user, null, 2))
         return res.status(201).json({token, user})
     }
     catch (e) {
-        res.status(401).json(e)
+        console.log(e)
+        const errorMessage = e.message || 'An error occurred';
+        return res.status(401).json({ error: errorMessage });
+
 
     }
 }
