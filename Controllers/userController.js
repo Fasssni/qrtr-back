@@ -39,7 +39,7 @@ const login = async (req, res) => {
     catch (e) {
         console.log(e)
         const errorMessage = e.message || 'An error occurred';
-        return res.status(401).json({ error: errorMessage });
+        return res.status(402).json({ error: errorMessage });
 
 
     }

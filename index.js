@@ -9,7 +9,7 @@ const interfaceRoutes=require("./Routes/interfaceRoutes.js")
 const db = require('./Models/index.js')
 const { catchMessage,startBots} = require('./Controllers/tgControllers.js')
 
-const TelegramApi = require("node-telegram-bot-api")
+
 
 
 const PORT=process.env.PORT||3000
@@ -36,7 +36,6 @@ db.sequelize.sync({ force: false }).then(() => {
 })
 
 
-const {removeChatByBotId} =require("././Services/ConversationService.js")
 
 async function startApp(){ 
     try{ 
