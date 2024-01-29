@@ -10,26 +10,30 @@ const wss = new ws.Server({
 }, () => console.log(`Server started on 5001`))
 
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function (message) {
-        message = JSON.parse(message)
-        ws.id=message.user_id
-        console.log("it did work")
-        switch (message.method) {
-            case 'message':
-                handleClientMessage(message)
-                break;
-            case 'chat-connection':
-                getUserChat(message)
-                break;
-            case "conversations":
-                handleConversations(message.user_id)
-                break;
-            
-        }
+    try{
+        wss.on('connection', function connection(ws) {
+            ws.on('message', function (message) {
+                message = JSON.parse(message)
+                ws.id=message.user_id
+                console.log("it did work")
+                switch (message.method) {
+                    case 'message':
+                        handleClientMessage(message)
+                        break;
+                    case 'chat-connection':
+                        getUserChat(message)
+                        break;
+                    case "conversations":
+                        handleConversations(message.user_id)
+                        break;
+                    
+                }
 
-    })
-})
+            })
+        })
+    }catch(err){
+        console.log(err)
+    }
 
 function broadcastMessage(message) {
     wss.clients.forEach(client => {
