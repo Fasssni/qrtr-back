@@ -36,7 +36,7 @@ const login = async (req, res) => {
             maxAge: 1 * 24 * 60 * 60 * 1000, 
             httpOnly: true,
             secure:true,
-            domain:"qurter.netlify.app"
+            domain:"hhtps://qurter.netlify.app"
         })
         return res.status(201).json({token, user})
        
