@@ -35,7 +35,8 @@ const login = async (req, res) => {
         res.cookie('jwt', token, { 
             maxAge: 1 * 24 * 60 * 60 * 1000, 
             httpOnly: true,
-            secure:true
+            secure:true,
+            domain:"qurter.netlify.app"
         })
         return res.status(201).json({token, user})
        
@@ -44,8 +45,6 @@ const login = async (req, res) => {
         console.log(e)
         const errorMessage = e.message || 'An error occurred';
         return res.status(402).json({ error: errorMessage });
-
-
     }
 }
 
