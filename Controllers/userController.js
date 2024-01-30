@@ -34,7 +34,9 @@ const login = async (req, res) => {
         const {token, user}= await UserService.login({email, password})
         res.cookie('jwt', token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true })
         console.log("user", JSON.stringify(user, null, 2))
+        console.log(token, 'ACCESS TOKEN')
         return res.status(201).json({token, user})
+       
     }
     catch (e) {
         console.log(e)
