@@ -50,7 +50,7 @@ class UserService {
             const isPassword = await bcrypt.compare(password, user.password)
 
             if (isPassword) {
-                let token = generateAccessToken(user.id)
+                let token = await generateAccessToken(user.id)
 
                 const { id } = user
                 

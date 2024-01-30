@@ -3,7 +3,7 @@ const db = require("../Models")
 
 class TokenService {
 
-    generateAccessToken(id) {
+    async generateAccessToken(id) {
         const accessToken = jwt.sign({ id: id }, process.env.secretKey, {
             expiresIn: 1 * 24 * 60 * 60 * 1000,
         })
