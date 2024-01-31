@@ -7,12 +7,10 @@ const { getConversations } = require('../Controllers/tgControllers');
 
 const wss = new ws.Server({
     port: process.env.WSSport,
-}, () => console.log(`Server started on 5001`))
-
-
-    try{
+})
         wss.on('connection', function connection(ws) {
             ws.on('message', function (message) {
+            try{
                 message = JSON.parse(message)
                 ws.id=message.user_id
                 console.log("it did work")
@@ -28,12 +26,13 @@ const wss = new ws.Server({
                         break;
                     
                 }
+            }catch(err){
+                 console.log(err)
+                }
 
             })
         })
-    }catch(err){
-        console.log(err)
-    }
+    
 
 function broadcastMessage(message) {
     wss.clients.forEach(client => {
