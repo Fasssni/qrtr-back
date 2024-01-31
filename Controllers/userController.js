@@ -34,9 +34,9 @@ const login = async (req, res) => {
         const {token, user}= await UserService.login({email, password})
         res.cookie('jwt', token, { 
             maxAge: 1 * 24 * 60 * 60 * 1000, 
-            httpOnly: true,
+            httpOnly: false,
             secure:true,
-            domain:"hhtps://qurter.netlify.app"
+            
         })
         return res.status(201).json({token, user})
        
