@@ -32,7 +32,7 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body
         const {token, user}= await UserService.login({email, password})
-        res.cookie('accessToken', token, { 
+        res.cookie('jwt', token, { 
             maxAge: 1 * 24 * 60 * 60 * 1000, 
             httpOnly: false,
             secure:true,
