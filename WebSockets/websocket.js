@@ -1,4 +1,3 @@
-const env=require("dotenv").config()
 
 const ws = require('ws');
 

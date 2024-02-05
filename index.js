@@ -39,7 +39,7 @@ db.sequelize.sync({ force: false }).then(() => {
 
 async function startApp(){ 
     try{ 
-        app.listen(PORT,console.log(`it's all started at ${PORT}`))
+        app.listen(PORT,()=>console.log(`it's all started at ${PORT}`))
         await catchMessage()
     }catch(e){ 
          console.log(e.message)
