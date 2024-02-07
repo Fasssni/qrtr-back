@@ -4,19 +4,30 @@ const db = require("../Models");
 const wss = require("../WebSockets/websocket");
 
 const BotService = require("../Services/BotService");
+const { createMessage } = require("../Services/MessageService");
 const InterfaceService = require("../Services/InterfaceService");
 const { InstanceError } = require("sequelize");
 const ConversationService = require("../Services/ConversationService");
 const { checkAuth } = require("./userController");
+const { startAutomations } = require("./botControllers");
+const TemplateService = require("../Services/TemplateService");
 
 let botInstance = null;
 
 const createBotInstance = async (req, res) => {
   try {
     const { user_id } = req.query;
-    const { token } = req.body;
+    const { token, greeting } = req.body;
 
     const botToken = await BotService.createBotInstance(user_id, token);
+    if (greeting) {
+      const greetingTemplate = await TemplateService.createTemplate({
+        bot_id: botToken.id,
+        name: "greeting",
+        triggersTo: "/start",
+        text: greeting,
+      });
+    }
 
     await catchMessage();
     return res.status(201).json(botToken);
@@ -60,24 +71,25 @@ const catchMessage = async () => {
   try {
     botsTG.forEach((bot) => {
       bot.on("message", async (message) => {
-        const botdb = await db.botToken.findOne({
-          where: {
-            token: bot.token,
-          },
-        });
+        const botdb = await BotService.findBotByToken(bot.token);
 
-        const isConversation = await db.conversations.findOne({
-          where: {
-            to_id: message.from.id,
-            bot_id: botdb.id,
-          },
-        });
+        const isConversation = await ConversationService.findChatByIds(
+          message,
+          botdb
+        );
 
         if (isConversation) {
-          const data = await db.message.create({
+          const data = await createMessage(
+            isConversation.user_id,
+            message.text,
+            message.from.first_name,
+            isConversation.id
+          );
+          await startAutomations({
+            bot_id: botdb.id,
+            bot,
+            message,
             user_id: isConversation.user_id,
-            text: message.text,
-            name: message.from.first_name,
             conversation_id: isConversation.id,
           });
           socketMessageHandler(data);
@@ -125,14 +137,9 @@ const sendMessage = async (req, res, next) => {
 
     const botdb = botsDB.find((item) => item.id === conversation.bot_id);
     const bot = botsTG.find((item) => item.token === botdb.token);
-    console.log(botsTG, "gegeg");
+    console.log(botsTG, "Сurrent Bots");
     const message = await bot.sendMessage(to_id, text);
-    const data = await db.message.create({
-      user_id: user_id,
-      text: text,
-      name: name,
-      conversation_id: id,
-    });
+    const data = await createMessage(user_id, text, name, id);
     res.status(200).json(data);
     socketMessageHandler(data);
   } catch (e) {
