@@ -242,7 +242,6 @@ const getConversations = async (req, res) => {
 
 const getUserChat = async (req, res) => {
   try {
-    const { user_id } = req.query;
     const { id } = req.params;
     const chat = await db.message.findAll({
       where: {
