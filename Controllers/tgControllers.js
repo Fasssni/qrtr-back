@@ -80,7 +80,7 @@ const catchMessage = async () => {
 
         if (isConversation) {
           const data = await createMessage(
-            isConversation.user_id,
+            message.from.id,
             message.text,
             message.from.first_name,
             isConversation.id
@@ -108,9 +108,17 @@ const catchMessage = async () => {
             channel: "telegram",
           });
           const data = await db.message.create({
-            user_id: botdb.user_id,
+            user_id: message.from.id,
             text: message.text,
             name: message.from.first_name,
+            conversation_id: conversation.id,
+          });
+
+          await startAutomations({
+            bot_id: botdb.id,
+            bot,
+            message,
+            user_id: conversation.user_id,
             conversation_id: conversation.id,
           });
           socketConvHandler(conversation, botdb.user_id);
@@ -239,7 +247,6 @@ const getUserChat = async (req, res) => {
     const chat = await db.message.findAll({
       where: {
         conversation_id: id,
-        user_id: user_id,
       },
     });
     res.status(200).json(chat);

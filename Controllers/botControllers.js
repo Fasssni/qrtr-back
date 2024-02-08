@@ -14,12 +14,12 @@ const startAutomations = async ({
 
       if (template) {
         await bot.sendMessage(message.from.id, template.text);
-        await createMessage({
+        await createMessage(
           user_id,
-          text: template.text,
-          name: message.from.first_name,
-          conversation_id,
-        });
+          template.text,
+          message.from.first_name,
+          conversation_id
+        );
       }
     } catch (err) {
       console.log(err);

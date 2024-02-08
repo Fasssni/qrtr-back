@@ -2,7 +2,7 @@ const TelegramApi = require("node-telegram-bot-api");
 const db = require("../Models");
 
 const { removeChatByBotId } = require("../Services/ConversationService");
-
+const { deleteTemplateByBotId } = require("../Services/TemplateService");
 class BotService {
   async createBotInstance(user_id, token) {
     const isToken = await db.botToken.findOne({
@@ -40,11 +40,13 @@ class BotService {
   async deleteBot(id) {
     try {
       await removeChatByBotId(id);
+      await deleteTemplateByBotId(id);
       const deletedBot = await db.botToken.destroy({
         where: {
           id: id,
         },
       });
+
       return deletedBot;
     } catch (e) {
       console.log(e);

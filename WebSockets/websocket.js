@@ -50,7 +50,6 @@ async function getUserChat({ user_id, conversation_id }) {
   const messages = await db.message.findAll({
     where: {
       conversation_id: conversation_id,
-      user_id: user_id,
     },
   });
   wss.clients.forEach((client) => {

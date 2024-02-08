@@ -10,14 +10,18 @@ class MessageService {
   }
 
   async createMessage(user_id, text, name, conversation_id) {
-    const message = await db.message.create({
-      user_id,
-      text,
-      name,
-      conversation_id,
-    });
+    try {
+      const message = await db.message.create({
+        user_id,
+        text,
+        name,
+        conversation_id,
+      });
 
-    return message;
+      return message;
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 
