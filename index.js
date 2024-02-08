@@ -27,13 +27,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/apiv/", userRoutes, interfaceRoutes);
 app.use("/tg/", messageRoutes);
 
-db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync({ force: false }).then(() => {
   console.log("db has been re sync");
 });
 
 async function startApp() {
   try {
-    app.listen(PORT, () => console.log(`it's all started at ${PORT}`));
+    let httpsServer = app.listen(PORT, () =>
+      console.log(`it's all started at ${PORT}`)
+    );
+
     await catchMessage();
   } catch (e) {
     console.log(e.message);
