@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/apiv/", userRoutes, interfaceRoutes);
 app.use("/tg/", messageRoutes);
 
-db.sequelize.sync({ force: false }).then(() => {
+db.sequelize.sync({ force: true }).then(() => {
   console.log("db has been re sync");
 });
 
