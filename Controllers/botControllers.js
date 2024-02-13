@@ -1,5 +1,7 @@
 const { findTemplate } = require("../Services/TemplateService");
 const { createMessage } = require("../Services/MessageService");
+const { socketMessageHandler } = require("./tgControllers");
+
 const startAutomations = async ({
   bot_id,
   bot,
@@ -7,26 +9,27 @@ const startAutomations = async ({
   user_id,
   conversation_id,
 }) => {
-  console.log("it has been trgiggered");
-  const sendGreeting = async () => {
+  const sendTemplate = async () => {
     try {
       const template = await findTemplate(bot_id, message.text);
 
       if (template) {
         await bot.sendMessage(message.from.id, template.text);
-        await createMessage(
+        const messageData = await createMessage(
           user_id,
           template.text,
           message.from.first_name,
           conversation_id
         );
+
+        socketMessageHandler(messageData);
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  await sendGreeting();
+  await sendTemplate();
 };
 
 module.exports = {

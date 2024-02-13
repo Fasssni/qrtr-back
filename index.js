@@ -33,9 +33,7 @@ db.sequelize.sync({ force: false }).then(() => {
 
 async function startApp() {
   try {
-    let httpsServer = app.listen(PORT, () =>
-      console.log(`it's all started at ${PORT}`)
-    );
+    app.listen(PORT, () => console.log(`it's all started at ${PORT}`));
 
     await catchMessage();
   } catch (e) {

@@ -1,7 +1,6 @@
 const ws = require("ws");
-const httpsServer = require("../index");
+
 const db = require("../Models");
-const { getConversations } = require("../Controllers/tgControllers");
 
 const wss = new ws.Server({
   port: process.env.WSSport,

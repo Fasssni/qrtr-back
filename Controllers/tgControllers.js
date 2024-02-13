@@ -331,4 +331,5 @@ module.exports = {
   getChannels,
   startBots,
   deleteBot,
+  socketMessageHandler,
 };
