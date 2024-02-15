@@ -1,4 +1,7 @@
-const { findTemplate } = require("../Services/TemplateService");
+const {
+  findTemplate,
+  getTemplatesByBotId,
+} = require("../Services/TemplateService");
 const { createMessage } = require("../Services/MessageService");
 const { socketMessageHandler } = require("./tgControllers");
 
@@ -32,6 +35,17 @@ const startAutomations = async ({
   await sendTemplate();
 };
 
+const getUserTemplates = async (req, res) => {
+  try {
+    const { bot_id } = req.params;
+    const templates = await getTemplatesByBotId(bot_id);
+    res.status(201).json(templates);
+  } catch (err) {
+    res.status(501).json(err.message);
+  }
+};
+
 module.exports = {
   startAutomations,
+  getUserTemplates,
 };

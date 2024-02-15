@@ -32,6 +32,19 @@ class TemplateService {
       console.log(err);
     }
   }
+
+  async getTemplatesByBotId(bot_id) {
+    try {
+      const templates = await db.template.findAll({
+        where: {
+          bot_id,
+        },
+      });
+      return templates;
+    } catch (e) {
+      console.log(err);
+    }
+  }
 }
 
 module.exports = new TemplateService();

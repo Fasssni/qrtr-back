@@ -1,8 +1,8 @@
-const express = require("express")
+const express = require("express");
 
-const tgControllers = require('../Controllers/tgControllers')
+const tgControllers = require("../Controllers/tgControllers");
 
-const router = express.Router()
+const router = express.Router();
 
 const {
   sendMessage,
@@ -11,22 +11,21 @@ const {
   getUserChat,
   createBotInstance,
   clearChat,
-  removeChat, 
-  deleteBot
-} = tgControllers
+  removeChat,
+  deleteBot,
+} = tgControllers;
 
-router.post("/sendmessage", sendMessage)
+const { getUserTemplates } = require("../Controllers/botControllers");
 
-router.get("/getmgs", getMessages)
-router.get('/conversations', getConversations)
-router.get('/getchat/:id', getUserChat)
-router.post(`/createbot`, createBotInstance)
-router.delete("/clearchat", clearChat)
-router.delete("/removechat", removeChat)
-router.delete("/deletebot",deleteBot)
+router.post("/sendmessage", sendMessage);
 
+router.get("/getmgs", getMessages);
+router.get("/conversations", getConversations);
+router.get("/getchat/:id", getUserChat);
+router.get("/gettemplates/:bot_id", getUserTemplates);
+router.post(`/createbot`, createBotInstance);
+router.delete("/clearchat", clearChat);
+router.delete("/removechat", removeChat);
+router.delete("/deletebot", deleteBot);
 
-module.exports = router
-
-
-
+module.exports = router;
