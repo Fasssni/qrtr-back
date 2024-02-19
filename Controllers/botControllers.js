@@ -1,6 +1,7 @@
 const {
   findTemplate,
   getTemplatesByBotId,
+  createTemplate,
 } = require("../Services/TemplateService");
 const { createMessage } = require("../Services/MessageService");
 const { socketMessageHandler } = require("./tgControllers");
@@ -45,7 +46,28 @@ const getUserTemplates = async (req, res) => {
   }
 };
 
+const addTemplate = async (req, res) => {
+  try {
+    const { bot_id, name, triggersTo, text } = req.body;
+
+    if (!bot_id || !name || !triggersTo || !text) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const template = await createTemplate({
+      bot_id,
+      name,
+      triggersTo,
+      text,
+    });
+    res.status(201).json(template);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   startAutomations,
   getUserTemplates,
+  addTemplate,
 };

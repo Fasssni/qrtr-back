@@ -8,6 +8,7 @@ class TemplateService {
       return template;
     } catch (err) {
       console.log(err);
+      throw err;
     }
   }
   async findTemplate(bot_id, trigger) {

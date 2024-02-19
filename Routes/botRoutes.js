@@ -15,9 +15,13 @@ const {
   deleteBot,
 } = tgControllers;
 
-const { getUserTemplates } = require("../Controllers/botControllers");
+const {
+  getUserTemplates,
+  addTemplate,
+} = require("../Controllers/botControllers");
 
 router.post("/sendmessage", sendMessage);
+router.post("/addtemplate", addTemplate);
 
 router.get("/getmgs", getMessages);
 router.get("/conversations", getConversations);
