@@ -1,4 +1,5 @@
 const ws = require("ws");
+const { Sequelize, Op } = require("sequelize");
 
 const db = require("../Models");
 
@@ -74,9 +75,46 @@ async function handleConversations(user_id) {
     },
   });
 
+  const conversationIds = conversations.map((convo) => convo.id);
+
+  const lastMessageSubquery = await db.message.findAll({
+    attributes: [
+      [Sequelize.fn("MAX", Sequelize.col("id")), "lastMessageId"],
+      "conversation_id",
+    ],
+    where: {
+      conversation_id: {
+        [Op.in]: conversationIds,
+      },
+    },
+    group: ["conversation_id"],
+    raw: true,
+  });
+
+  const lastMessageIds = lastMessageSubquery.map((row) => row.lastMessageId);
+
+  const lastMessages = await db.message.findAll({
+    where: {
+      id: {
+        [Op.in]: lastMessageIds,
+      },
+    },
+    raw: true,
+  });
+
+  const result = conversations.map((conversation) => {
+    const lastMessage = lastMessages.find(
+      (message) => message.conversation_id === conversation.id
+    );
+    return {
+      ...conversation.toJSON(),
+      lastMessage: lastMessage ? lastMessage : null,
+    };
+  });
+
   wss.clients.forEach((client) => {
     if (user_id === client.id) {
-      client.send(JSON.stringify({ method: "conversations", conversations }));
+      client.send(JSON.stringify({ method: "conversations", result }));
     }
   });
 }

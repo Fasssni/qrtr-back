@@ -57,9 +57,7 @@ const startBots = async () => {
         botsDB: [...botInstance.botsDB, ...newBotsDB],
         botsTG: [...botInstance.botsTG, ...newBotsTG],
       };
-      console.log(botInstance);
     }
-    console.log("BOT INSTANCES", botInstance);
     return botInstance;
   } catch (e) {
     console.log(e);
@@ -95,8 +93,6 @@ const catchMessage = async () => {
           socketMessageHandler(data);
         } else {
           const imageUrl = await getUserPhoto(message.from.id, bot);
-
-          console.log(imageUrl);
 
           const conversation = await db.conversations.create({
             user_id: botdb.user_id,
@@ -141,11 +137,9 @@ const sendMessage = async (req, res, next) => {
         id: id,
       },
     });
-    console.log(conversation);
 
     const botdb = botsDB.find((item) => item.id === conversation.bot_id);
     const bot = botsTG.find((item) => item.token === botdb.token);
-    console.log(botsTG, "Сurrent Bots");
     const message = await bot.sendMessage(to_id, text);
     const data = await createMessage(user_id, text, name, id);
     res.status(200).json(data);
@@ -187,7 +181,7 @@ const getUserPhoto = async (client_id, bot) => {
     if (profilePic.length > 0) {
       const file_id = profilePic[0][0]?.file_id;
       const getFileUrl = `https://api.telegram.org/bot${bot.token}/getFile?file_id=${file_id}`;
-      console.log(getFileUrl);
+
       const urlResponse = await fetch(getFileUrl);
 
       if (urlResponse.ok) {
@@ -229,12 +223,50 @@ const getMessages = async (req, res) => {
 const getConversations = async (req, res) => {
   try {
     const { user_id } = req.query;
+
     const conversations = await db.conversations.findAll({
       where: {
         user_id: user_id,
       },
     });
-    res.status(200).json(conversations);
+
+    const conversationIds = conversations.map((convo) => convo.id);
+
+    const lastMessageSubquery = await db.message.findAll({
+      attributes: [
+        [Sequelize.fn("MAX", Sequelize.col("id")), "lastMessageId"],
+        "conversation_id",
+      ],
+      where: {
+        conversation_id: {
+          [Op.in]: conversationIds,
+        },
+      },
+      group: ["conversation_id"],
+      raw: true,
+    });
+
+    const lastMessageIds = lastMessageSubquery.map((row) => row.lastMessageId);
+
+    const lastMessages = await db.message.findAll({
+      where: {
+        id: {
+          [Op.in]: lastMessageIds,
+        },
+      },
+      raw: true,
+    });
+
+    const result = conversations.map((conversation) => {
+      const lastMessage = lastMessages.find(
+        (message) => message.conversation_id === conversation.id
+      );
+      return {
+        ...conversation.toJSON(),
+        lastMessage: lastMessage ? lastMessage : null,
+      };
+    });
+    res.status(200).json(result);
   } catch (e) {
     res.status(501).json("Something went wrong on the server");
   }
@@ -310,7 +342,6 @@ const deleteBot = async (req, res) => {
     });
 
     const deletedBot = await BotService.deleteBot(id);
-    console.log(botInstance.botsTG, "TEST");
     res.status(200).json(deletedBot);
   } catch (e) {
     res.status(501).json(e);
