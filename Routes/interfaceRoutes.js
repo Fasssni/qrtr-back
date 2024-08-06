@@ -1,8 +1,12 @@
-const epxress= require('express')
-const router=epxress.Router()
+const epxress = require("express");
+const router = epxress.Router();
 
-const {getChannels}=require("../Controllers/tgControllers")
+const userController = require("../Controllers/userController");
 
-router.get("/getchannels", getChannels)
+const { getChannels } = require("../Controllers/tgControllers");
+const { searchUsersByName } = require("../Controllers/interfaceControllers");
 
-module.exports=router
+router.get("/getchannels", getChannels);
+router.get("/searchclient", userController.checkAuth, searchUsersByName);
+
+module.exports = router;
