@@ -114,7 +114,9 @@ async function handleConversations(user_id) {
 
   wss.clients.forEach((client) => {
     if (user_id === client.id) {
-      client.send(JSON.stringify({ method: "conversations", result }));
+      client.send(
+        JSON.stringify({ method: "conversations", conversations: result })
+      );
     }
   });
 }
