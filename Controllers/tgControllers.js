@@ -13,6 +13,7 @@ const { startAutomations } = require("./botControllers");
 const TemplateService = require("../Services/TemplateService");
 
 const { Sequelize, Op } = require("sequelize");
+const { checkauth } = require("../Services/UserService");
 
 let botInstance = null;
 
@@ -224,11 +225,15 @@ const getMessages = async (req, res) => {
 
 const getConversations = async (req, res) => {
   try {
-    const { user_id } = req.query;
-
+    // const { user_id } = req.query;
+    const token = req.cookies.jwt;
+    const user = await checkauth(token);
+    if (!user) {
+      res.status(403).json("Unauth");
+    }
     const conversations = await db.conversations.findAll({
       where: {
-        user_id: user_id,
+        user_id: user.id,
       },
     });
 
@@ -270,7 +275,7 @@ const getConversations = async (req, res) => {
     });
     res.status(200).json(result);
   } catch (e) {
-    res.status(500).json(e.message);
+    res.status(e.message === "Unauthorized" ? 403 : 500).json(e.message);
   }
 };
 
