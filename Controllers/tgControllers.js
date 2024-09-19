@@ -210,16 +210,20 @@ const getUserPhoto = async (client_id, bot) => {
 
 const getMessages = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const token = req.cookies.jwt;
+    if (!token) {
+      res.status(403).json("Unauthorized");
+    }
+    const user = await checkauth(token);
     const messages = await db.message.findAll({
       where: {
-        user_id: user_id,
+        user_id: user.id,
       },
     });
     res.status(200).json(messages);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(e.message === "Unauthorized" ? 403 : 500).json(e.message);
   }
 };
 
@@ -227,10 +231,10 @@ const getConversations = async (req, res) => {
   try {
     // const { user_id } = req.query;
     const token = req.cookies.jwt;
-    const user = await checkauth(token);
-    if (!user) {
-      res.status(403).json("Unauth");
+    if (!token) {
+      res.status(403).json("Unauthorized");
     }
+    const user = await checkauth(token);
     const conversations = await db.conversations.findAll({
       where: {
         user_id: user.id,
@@ -282,6 +286,14 @@ const getConversations = async (req, res) => {
 const getUserChat = async (req, res) => {
   try {
     const { id } = req.params;
+    const token = req.cookies.jwt;
+    if (!token) {
+      res.status(403).json("Unauthorized");
+    }
+    const user = await checkauth(token);
+    if (!user) {
+      res.status(403).json("Unauthorized");
+    }
     const chat = await db.message.findAll({
       where: {
         conversation_id: id,
