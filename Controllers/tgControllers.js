@@ -229,16 +229,14 @@ const getMessages = async (req, res) => {
 
 const getConversations = async (req, res) => {
   try {
-    // const { user_id } = req.query;
     const token = req.cookies.jwt;
     if (!token) {
-      res.status(403).json("Unauthorized");
+      return res.status(403).json("Unauthorized");
     }
     const user = await checkauth(token);
+
     const conversations = await db.conversations.findAll({
-      where: {
-        user_id: user.id,
-      },
+      where: { user_id: user.id },
     });
 
     const conversationIds = conversations.map((convo) => convo.id);
@@ -277,27 +275,30 @@ const getConversations = async (req, res) => {
         lastMessage: lastMessage ? lastMessage : null,
       };
     });
-    res.status(200).json(result);
+
+    const sortedResult = result.sort((a, b) => {
+      const dateA = a.lastMessage
+        ? new Date(a.lastMessage.createdAt)
+        : new Date(0);
+      const dateB = b.lastMessage
+        ? new Date(b.lastMessage.createdAt)
+        : new Date(0);
+      return dateB - dateA;
+    });
+
+    res.status(200).json(sortedResult);
   } catch (e) {
     res.status(e.message === "Unauthorized" ? 403 : 500).json(e.message);
   }
 };
-
 const getUserChat = async (req, res) => {
   try {
     const { id } = req.params;
-    const token = req.cookies.jwt;
-    if (!token) {
-      res.status(403).json("Unauthorized");
-    }
-    const user = await checkauth(token);
-    if (!user) {
-      res.status(403).json("Unauthorized");
-    }
     const chat = await db.message.findAll({
       where: {
         conversation_id: id,
       },
+      order: [["createdAt", "ASC"]],
     });
     res.status(200).json(chat);
   } catch (e) {

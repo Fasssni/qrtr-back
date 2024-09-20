@@ -27,7 +27,7 @@ router.post("/addtemplate", addTemplate);
 router.get("/getmgs", getMessages);
 router.get("/conversations", getConversations);
 router.get("/getchat/:id", isAuth, getUserChat);
-router.get("/gettemplates/:bot_id", getUserTemplates);
+router.get("/gettemplates/:bot_id", isAuth, getUserTemplates);
 router.post(`/createbot`, createBotInstance);
 router.delete("/clearchat", clearChat);
 router.delete("/removechat", removeChat);
