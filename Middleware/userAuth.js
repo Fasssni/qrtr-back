@@ -1,7 +1,35 @@
 const express = require("express");
 
 const db = require("../Models");
+const { findAccessToken } = require("../Services/TokenService");
 const User = db.users;
+
+const isAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token) {
+      return res.status(403).json("Unauthorized");
+    }
+
+    const accessToken = await findAccessToken(token);
+    if (!accessToken) {
+      return res.status(403).json("Unauthorized");
+    }
+
+    const userData = await User.findOne({
+      where: {
+        id: accessToken.user_id,
+      },
+    });
+    if (!userData) {
+      return res.status(403).json("Unauthorized");
+    }
+
+    next();
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
 
 const saveUser = async (req, res, next) => {
   try {
@@ -41,4 +69,5 @@ const getChat = async (user_id, id) => {
 module.exports = {
   saveUser,
   getChat,
+  isAuth,
 };
