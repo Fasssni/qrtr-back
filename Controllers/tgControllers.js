@@ -163,11 +163,20 @@ const socketConvHandler = (value, user_id) => {
   });
 };
 
-const socketMessageHandler = (value) => {
+const socketMessageHandler = async (value) => {
   console.log("the socket has been called");
+  const conversation = await db.conversations.findAll({
+    where: {
+      id: value.conversation_id,
+    },
+  });
+
   try {
     wss.clients.forEach((client) => {
-      client.send(JSON.stringify({ method: "message", message: value }));
+      if (client.id === conversation.user_id) {
+        console.log("its' been here ");
+        client.send(JSON.stringify({ method: "message", message: value }));
+      }
     });
   } catch (e) {
     console.log(e);
